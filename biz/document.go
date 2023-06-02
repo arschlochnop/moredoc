@@ -594,6 +594,8 @@ func (s *DocumentAPIService) SearchDocument(ctx context.Context, req *pb.SearchD
 		"keywords":    util.Slice2Interface(strings.Split(req.Wd, " ")),
 		"description": util.Slice2Interface(strings.Split(req.Wd, " ")),
 	}
+	//添加全文索引
+	opt.QueryText = req.Wd
 	if len(req.CategoryId) > 0 {
 		opt.QueryIn = map[string][]interface{}{
 			"category_id": util.Slice2Interface(req.CategoryId),

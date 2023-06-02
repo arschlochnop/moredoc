@@ -355,6 +355,39 @@ func (m *DBModel) generateQueryLike(db *gorm.DB, tableName string, queryLike map
 	return db
 }
 
+// generateQueryLike 生成like查询。Like 查询比较特殊，统一用or来拼接查询的字段
+func (m *DBModel) generateQueryFullText(db *gorm.DB, tableName string, queryText string) *gorm.DB {
+	alias := ""
+	slice := strings.Split(tableName, " ")
+	if len(slice) == 2 {
+		tableName = slice[0]
+		alias = slice[1] + "."
+	}
+
+	// if len(queryText) > 0 {
+	// 	var likeQuery []string
+	// 	var likeValues []interface{}
+	// 	for field, values := range queryLike {
+	// 		fields := m.FilterValidFields(tableName, field)
+	// 		if len(fields) == 0 {
+	// 			continue
+	// 		}
+	// 		for _, value := range values {
+	// 			valueStr := fmt.Sprintf("%v", value)
+	// 			likeQuery = append(likeQuery, fmt.Sprintf("%s%s like ?", alias, field))
+	// 			likeValues = append(likeValues, "%"+valueStr+"%")
+	// 		}
+	// 	}
+	// 	if len(queryText) > 0 {
+	// 		db = db.Where(strings.Join(likeQuery, " or "), likeValues...)
+	// 	}
+	// }
+	if len(queryText) > 0 {
+		db = db.Where(fmt.Sprintf("match(%sfulldata) against (? in boolean mode)", alias), queryText)
+	}
+	return db
+}
+
 func (m *DBModel) generateQueryRange(db *gorm.DB, tableName string, queryRange map[string][2]interface{}) *gorm.DB {
 	alias := ""
 	slice := strings.Split(tableName, " ")
